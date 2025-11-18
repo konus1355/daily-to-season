@@ -1,65 +1,68 @@
-from tkinter import *
-from tkinter import font
+import streamlit as st
 
-root = Tk()
-root.title("Season-long to Max daily catch converter")
-root.geometry("400x250")
-root.iconbitmap('favicon.ico')
+# Page config
+st.set_page_config(
+    page_title="Season-long to Max Daily Catch Converter",
+    page_icon="🦋",
+    layout="centered"
+)
 
-# Font and padding settings
-default_font = font.nametofont("TkDefaultFont")
-default_font.configure(size=12)
-root.option_add("*Font", default_font)
-pad_x = 10
-pad_y = 5
+st.title("Season-long to Max Daily Catch Converter")
 
-# Input
-label1 = Label(root, text="Season-long catch")
-label1.grid(row=0, column=0, padx=pad_x, pady=pad_y)
-entry1 = Entry(root, width=10)
-entry1.grid(row=0, column=1, padx=pad_x, pady=pad_y)
+st.write(
+    "Convert season-long catch into an estimated range of maximum daily catch "
+    "using the relationship from Onufrieva & Onufriev (2018)."
+)
 
-label2 = Label(root, text="Flight in Weeks")
-label2.grid(row=1, column=0, padx=pad_x, pady=pad_y)
-entry2 = Entry(root, width=10)
-entry2.grid(row=1, column=1, padx=pad_x, pady=pad_y)
+# Inputs
+season_long = st.number_input(
+    "Season-long catch",
+    min_value=0.0,
+    step=1.0,
+    format="%.0f"
+)
 
-# Functions
-def calculate():
-    convert1 = entry1.get()
-    convert2 = entry2.get()
-    a = int(convert1)
-    x = int(convert2)
-    answer1 = a / (2.87 * x)
-    answer2 = a / (0.96 * x)
-    finalans1 = round(answer1,2)
-    finalans2 = round(answer2,2)
-    anslabel.config(text=str(finalans1) + "-" + str(finalans2))
+flight_weeks = st.number_input(
+    "Flight duration (weeks)",
+    min_value=0.0,
+    step=1.0,
+    format="%.1f"
+)
 
-def about():
-    winx = root.winfo_x()
-    winy = root.winfo_y()
-    about_win = Toplevel(root)
-    about_win.title("About")
-    about_win.geometry("+%d+%d" % (winx + 50, winy + 50))
-    abt_label1 = Label(about_win, text="Programmed by: Andrei Onufriev")
-    abt_label1.grid(row=0, column=0, columnspan=2, pady=pad_y)
-    abt_label2 = Label(about_win, text="2020 ©")
-    abt_label2.grid(row=1, column=0, pady=pad_y)
-    abt_label3 = Label(about_win, text="Onufrieva, K. S. & A. V. Onufriev. 2018. Linear relationship between peak and season-long abundances in insects. PLOS ONE 13: e0193110.doi:10.1371/journal.pone.0193110.")
-    abt_label3.grid(row=2, column=0, columnspan=2, pady=pad_y)
-    about_win.iconbitmap('favicon.ico')
+# Calculate button
+if st.button("Calculate"):
+    if flight_weeks <= 0:
+        st.error("Flight duration must be greater than 0 weeks.")
+    elif season_long < 0:
+        st.error("Season-long catch cannot be negative.")
+    else:
+        # Original formulas:
+        # answer1 = a / (2.87 * x)
+        # answer2 = a / (0.96 * x)
+        a = season_long
+        x = flight_weeks
 
-# Buttons
-button1 = Button(root, text="Calculate", command=calculate, width=12)
-button1.grid(row=2, column=0, columnspan=2, pady=(10, 5))
-button2 = Button(root, text="About", command=about, width=12)
-button2.grid(row=3, column=0, columnspan=2, pady=5)
+        answer1 = a / (2.87 * x)
+        answer2 = a / (0.96 * x)
 
-# Output
-output_label = Label(root, text="Output Range:")
-output_label.grid(row=4, column=0, padx=pad_x, pady=pad_y)
-anslabel = Label(root, text="")
-anslabel.grid(row=4, column=1, padx=pad_x, pady=pad_y)
+        finalans1 = round(answer1, 2)
+        finalans2 = round(answer2, 2)
 
-root.mainloop()
+        st.success(
+            f"Estimated max daily catch range: **{finalans1} – {finalans2}** moths/trap/day"
+        )
+
+# About section
+with st.expander("About this tool"):
+    st.markdown(
+        """
+        **Programmed originally by:** Andrei Onufriev  
+        **Adapted for web deployment by:** Ksenia & ChatGPT 🥒  
+
+        Based on:
+
+        Onufrieva, K. S. & A. V. Onufriev. 2018.  
+        *Linear relationship between peak and season-long abundances in insects.*  
+        PLOS ONE 13: e0193110. doi:10.1371/journal.pone.0193110.
+        """
+    )
