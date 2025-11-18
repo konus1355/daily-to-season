@@ -56,8 +56,7 @@ if st.button("Calculate"):
 with st.expander("About this tool"):
     st.markdown(
         """
-        **Programmed originally by:** Andrei Onufriev  
-        **Adapted for web deployment by:** Ksenia & ChatGPT 🥒  
+        **Programmed by:** Andrei Onufriev   
 
         Based on:
 
